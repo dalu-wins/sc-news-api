@@ -1,12 +1,12 @@
 # <img src="https://github.com/dalu-wins/sc-news/blob/master/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
 Provide information to the SC News app.
 
-## Endpoints
+## 📝 Endpoints
 Endpoint | Variables | Description |
 --- | --- | ---
 `/api/patches` | max_patches | Set the limit of patches that the api will return 
 
-## Setup
+## 🛠️ Setup
 
 ### Clone repo & install requirements
 ```bash
