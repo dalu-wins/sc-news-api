@@ -11,7 +11,7 @@ Endpoint | Variables | Description |
 ### Clone repo & install requirements
 ```
 git clone https://github.com/dalu-wins/sc-news-api.git
-cd sc-news-api/
+cd sc-news-api/src
 pip install -r requirements.txt
 ```
 
