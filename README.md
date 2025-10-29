@@ -1,4 +1,4 @@
-# <img src="https://github.com/dalu-wins/sc-news/blob/master/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
+# <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
 Provide information to the SC News app.
 
 ## 📝 Endpoints
