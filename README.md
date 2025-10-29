@@ -12,7 +12,6 @@ Endpoint | Variables | Description |
 ```bash
 # Clone
 git clone https://github.com/dalu-wins/sc-news-api.git
-cd sc-news-api/src
 
 # Install python requirements
 cd sc-news-api/src
