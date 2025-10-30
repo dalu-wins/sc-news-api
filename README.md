@@ -64,3 +64,22 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Now you should be able to check if the api is correctly running with ```http://localhost:8000?max_patches=10```
+
+## ✍ Documentation
+
+Learn more about this project:
+- [Project Board](https://github.com/users/dalu-wins/projects/3/views/1)
+- [SC News App](https://github.com/dalu-wins/sc-news)
+
+## ℹ️ Notice & Disclaimers
+
+This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of
+companies. All content on this app not authored by its developers or users are property of their
+respective owners.
+
+Star Citizen®, Roberts Space Industries® and Cloud Imperium ® are registered trademarks of Cloud
+Imperium Rights LLC
+
+<p align="center">
+  <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/MadeByTheCommunity_White.png" alt="Made By The Community Banner" height="200">
+</p>
