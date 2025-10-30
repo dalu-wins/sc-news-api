@@ -1,10 +1,10 @@
 # <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
 Provide information to the SC News app.
 
-## 📝 Endpoints
-Endpoint | Variables | Description |
---- | --- | ---
-`/` | max_patches | Set the limit of patches that the api will return
+## 📝 Variables
+| Variable | Description |
+--- | ---
+max_patches | Set the limit of patches that the api will return
 
 ## 🗄️ Server
 The public API is hosted on my homepage:
@@ -17,9 +17,7 @@ The API implements caching and concurrency protection:
 - If multiple clients call the API simultaneously, subsequent requests **wait** for the first scrape to finish and then **read from the cache**.
 - This means that **at most one scrape per 10 minutes** is performed, minimizing load on Spectrum.
 
-⚠️ While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.  
-(If you notice an issue or inefficiency, feel free to open a GitHub issue or pull request.)
-
+While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
 
 ## 🛠️ Setup
 Make sure you have installed `python3` beforehand. You might need to run the python steps fromS `venv`.
