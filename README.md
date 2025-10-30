@@ -7,8 +7,9 @@ Endpoint | Variables | Description |
 `/` | max_patches | Set the limit of patches that the api will return
 
 ## 🗄️ Server
-The public API is hosted on my homepage: [https://www.dalu-wins.de/](https://www.dalu-wins.de/)
-Test it here: [https://api.dalu-wins.de/sc-news](https://api.dalu-wins.de/sc-news)
+The public API is hosted on my homepage:
+- [https://www.dalu-wins.de/](https://www.dalu-wins.de/)
+- [https://api.dalu-wins.de/sc-news](https://api.dalu-wins.de/sc-news)
 
 The API implements caching and concurrency protection:
 - Scraped results are cached for **10 minutes**.
