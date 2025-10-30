@@ -4,9 +4,24 @@ Provide information to the SC News app.
 ## 📝 Endpoints
 Endpoint | Variables | Description |
 --- | --- | ---
-`/api/patches` | max_patches | Set the limit of patches that the api will return 
+`/` | max_patches | Set the limit of patches that the api will return
+
+## 🗄️ Server
+The public API is hosted on my homepage: [https://www.dalu-wins.de/](https://www.dalu-wins.de/)
+Test it here: [https://api.dalu-wins.de/sc-news](https://api.dalu-wins.de/sc-news)
+
+The API implements caching and concurrency protection:
+- Scraped results are cached for **10 minutes**.
+- Only **one scraping job** can run at a time.
+- If multiple clients call the API simultaneously, subsequent requests **wait** for the first scrape to finish and then **read from the cache**.
+- This means that **at most one scrape per 10 minutes** is performed, minimizing load on Spectrum.
+
+⚠️ While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.  
+(If you notice an issue or inefficiency, feel free to open a GitHub issue or pull request.)
+
 
 ## 🛠️ Setup
+Make sure you have installed `python3` beforehand. You might need to run the python steps fromS `venv`.
 
 ### Clone repo & install requirements
 ```bash
@@ -49,4 +64,4 @@ rm -rf chromedriver-linux64 chromedriver-linux64.zip
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Now you should be able to check if the api is correctly running with ```http://localhost:8000/api/patches?max_patches=10```
+Now you should be able to check if the api is correctly running with ```http://localhost:8000?max_patches=10```

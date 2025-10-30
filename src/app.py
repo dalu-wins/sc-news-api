@@ -4,7 +4,7 @@ from scraper import scrape_dynamic_data
 
 app = FastAPI()
 
-@app.get("/api/patches")
+@app.get("/")
 def get_scraped_info(max_patches: int = 50):
        
     scraped_data = scrape_dynamic_data(max_patches = max_patches)
