@@ -12,7 +12,7 @@ The public API is hosted on my homepage:
 - [https://api.dalu-wins.de/sc-news](https://api.dalu-wins.de/sc-news)
 
 The API implements caching and concurrency protection:
-- Scraped results are cached for **10 minutes**.
+- Scraped results are cached for **5 minutes**.
 - Only **one scraping job** can run at a time.
 - If multiple clients call the API simultaneously, subsequent requests **wait** for the first scrape to finish and then **read from the cache**.
 - This means that **at most one scrape per 10 minutes** is performed, minimizing load on Spectrum.

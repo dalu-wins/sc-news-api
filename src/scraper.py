@@ -12,8 +12,8 @@ from selenium.webdriver.support import expected_conditions as EC
 # === Konfiguration ===
 CACHE_FILE = "spectrum_cache.json"
 LOCK_FILE = ".scrape.lock"
-CACHE_MAX_AGE_MINUTES = 10
-LOCK_TIMEOUT_MINUTES = 10
+CACHE_MAX_AGE_MINUTES = 5
+LOCK_TIMEOUT_MINUTES = 5
 WAIT_FOR_LOCK_TIMEOUT = 60  # maximal 60 Sekunden warten
 WAIT_FOR_LOCK_INTERVAL = 2  # alle 2 Sekunden prüfen
 
