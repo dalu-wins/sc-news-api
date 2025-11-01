@@ -19,7 +19,7 @@ For an easy setup, use Docker Compose.
 
 ### Steps
 
-By default, the API container exposes port 8000 **only to other Docker containers**.
+By default, the API container exposes port 8000.
 
 ```bash
 # Clone the repository
