@@ -1,0 +1,8 @@
+services:
+  sc-news-api:
+    build: .
+    image: sc-news-api:latest
+    container_name: sc-news-api
+    ports:
+      - "8000"
+    restart: always
