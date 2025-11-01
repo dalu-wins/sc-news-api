@@ -11,7 +11,7 @@ max_patches | Set the limit of patches that the api will return
 A public API is hosted on my server:
 - [https://sc-news.api.dalu-wins.de/](https://sc-news.api.dalu-wins.de/)
 
-While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
+> ⚠️ While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
 
 ## 🛠️ Setup
 
