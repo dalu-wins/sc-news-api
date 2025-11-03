@@ -18,7 +18,7 @@ def get_scraped_info(max_patches: int = 50):
         "status": "success",
         "data": {
             "timestamp": scraped_data.get("timestamp"),
-            "status": scraped_data.get("status"),
+            "cacheStatus": scraped_data.get("status"),
             "patches": parsed_patches,
         },
     }
