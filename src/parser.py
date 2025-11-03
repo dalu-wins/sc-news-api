@@ -41,7 +41,7 @@ WAVE_PATTERNS = {
     Wave.Two: [r"WAVE\s*2"],
     Wave.Three: [r"WAVE\s*3"],
     Wave.Four: [r"WAVE\s*4"],
-    Wave.AllBackers: [r"ALL\s*BACKER", r"ALL\s*BACKERS", r"PUBLIC"],
+    Wave.AllBackers: [r"ALL\s*BACKER", r"ALL\s*BACKERS", r"ALL\s*WAVE", r"ALL\s*WAVES"],
 }
 
 
