@@ -8,21 +8,28 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+
 # === Konfiguration ===
-CACHE_FILE = "spectrum_cache.json"
-LOCK_FILE = ".scrape.lock"
+CACHE_DIR = "./cache/notes/"
+LOCK_FILE = ".scrape.lock" # gleiches lockfile wie scrape_overview
 CHROMEDRIVER = "/usr/bin/chromedriver"
 CACHE_MAX_AGE_MINUTES = 5
 LOCK_TIMEOUT_MINUTES = 5
 WAIT_FOR_LOCK_TIMEOUT = 60  # maximal 60 Sekunden warten
 WAIT_FOR_LOCK_INTERVAL = 2  # alle 2 Sekunden prüfen
+
+
 # === Hilfsfunktionen ===
-def load_cache():
+def load_cache(url_b64: String):
     """Lädt den Cache, wenn vorhanden."""
-    if not os.path.exists(CACHE_FILE):
+
+    filename = url_b64 + ".json"
+
+    if not os.path.exists(filename):
         return None
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             data = json.load(f)
         timestamp = datetime.fromisoformat(data.get("timestamp"))
         age = datetime.now() - timestamp
@@ -36,16 +43,21 @@ def load_cache():
     except Exception as e:
         print(f"WARNUNG: Cache konnte nicht geladen werden: {e}")
         return None
-def save_cache(data: dict):
+
+
+def save_cache(url_b64: String, data: dict):
     """Speichert den Cache mit aktuellem Timestamp."""
     data["timestamp"] = datetime.now().isoformat()
     data["status"] = "fresh"
+    cachefile = CACHE_DIR + url_b64 + ".json"
     try:
-        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        with open(cachefile, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print("LOG: Cache aktualisiert.")
     except Exception as e:
         print(f"WARNUNG: Cache konnte nicht gespeichert werden: {e}")
+
+
 def is_scrape_running() -> bool:
     """Prüft, ob aktuell ein Scrape läuft."""
     if not os.path.exists(LOCK_FILE):
@@ -59,28 +71,25 @@ def is_scrape_running() -> bool:
         return True
     except Exception:
         return False
+
+
 def set_lock():
     with open(LOCK_FILE, "w") as f:
         f.write(str(datetime.now()))
+
+
 def clear_lock():
     try:
         if os.path.exists(LOCK_FILE):
             os.remove(LOCK_FILE)
     except Exception as e:
         print(f"WARNUNG: Lock konnte nicht gelöscht werden: {e}")
-def limit_cache(data: dict, max_patches: int) -> dict:
-    """Begrenzt die Anzahl der Einträge für den Rückgabewert."""
-    threads = data.get("threads", [])
-    limited = threads[:max_patches] if max_patches > 0 else threads
-    return {
-        "timestamp": data.get("timestamp"),
-        "status": data.get("status"),
-        "threads": limited
-    }
+
+
 # === Hauptlogik ===
-def scrape_dynamic_data(max_patches: int) -> dict:
-    """Scraped Threads, nutzt Cache und Lock-System."""
-    cached = load_cache()
+def scrape_overview(url_b64: String) -> dict:
+    """Scraped Notes, nutzt Cache und Lock-System."""
+    cached = load_cache(url_b64)
     # Frischen Cache direkt zurückgeben
     if cached and cached.get("status") == "cached":
         return limit_cache(cached, max_patches)
@@ -107,7 +116,7 @@ def scrape_dynamic_data(max_patches: int) -> dict:
             print("WARNUNG: Kein neuer Cache nach Freigabe — starte Scrape trotzdem.")
     # Lock setzen, um parallele Scrapes zu verhindern
     set_lock()
-    url = "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048?sort=hot&page=1"
+    url = base64.base64decode(url_b64)
     service = Service(CHROMEDRIVER)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -119,7 +128,7 @@ def scrape_dynamic_data(max_patches: int) -> dict:
         driver.get(url)
         print(f"LOG: Navigiert zu: {url}")
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "row.thread")))
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "row.thread"))) # TODO ab hier weiter anpassen
         print("LOG: Haupt-Container gefunden. Starte Extraktion.")
         thread_rows = driver.find_elements(By.CLASS_NAME, "row.thread")
         print(f"LOG: Gefundene Threads: {len(thread_rows)}")
