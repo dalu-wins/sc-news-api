@@ -166,7 +166,7 @@ def scrape_overview(max_patches: int) -> dict:
         return limit_cache(result_data, max_patches)
     except Exception as e:
         print(f"Ein Fehler beim Scraping ist aufgetreten: {e}")
-        err = {"status": "error", "error": str(e), "threads": []}
+        err = {"status": "error", "error": str(e)}
         return err
     finally:
         if driver:

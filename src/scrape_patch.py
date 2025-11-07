@@ -139,7 +139,9 @@ def scrape_notes(url_b64: str) -> dict:
         return data
 
     except Exception as e:
-        return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": str(e)}
+        print(f"Ein Fehler beim Scraping ist aufgetreten: {e}")
+        err = {"status": "error", "error": str(e)}
+        return err
     finally:
         if driver:
             driver.quit()
