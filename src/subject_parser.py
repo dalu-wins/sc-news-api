@@ -95,8 +95,11 @@ def parse_patch_entry(entry: dict) -> dict:
     version = get_version(subject)
     build = get_build(subject)
 
+    url_b64 = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+
     return {
         "sourceUrl": entry.get("url"),
+        "url_b64": url_b64,
         "pinned": entry.get("pinned", False),
         "subject": subject,  # keep original subject
         "channel": channel.value,
