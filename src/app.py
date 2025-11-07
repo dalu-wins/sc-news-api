@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from scrape_overview import scrape_overview
-from scrape_patch import scrape_patch
-from parser import parse_patch_entry
+from scrape_patch import scrape_notes
+from subject_parser import parse_patch_entry
 
 import base64
 
@@ -14,7 +14,6 @@ def get_scraped_overview(max_patches: int = 50):
     if scraped_data.get("error"):
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": scraped_data["error"]}, 500
 
-    # Threads in Patches umwandeln
     parsed_patches = [parse_patch_entry(t) for t in scraped_data.get("threads", [])]
 
     return {
@@ -29,7 +28,7 @@ def get_scraped_overview(max_patches: int = 50):
 @app.get("/patch-notes/thread")
 def get_scraped_note(url_b64: String):
 
-    scraped_data = scrape_patch(url_b64=url_b64)
+    scraped_data = scrape_notes(url_b64=url_b64)
 
     if scraped_data.get("error"):
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": scraped_data["error"]}, 500

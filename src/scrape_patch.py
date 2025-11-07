@@ -1,7 +1,9 @@
+import base64
 import json
 import os
 import time
 from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,60 +14,23 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # === Konfiguration ===
 CACHE_DIR = "./cache/notes/"
-LOCK_FILE = ".scrape.lock" # gleiches lockfile wie scrape_overview
+LOCK_FILE = ".scrape.lock"
 CHROMEDRIVER = "/usr/bin/chromedriver"
-CACHE_MAX_AGE_MINUTES = 5
+CACHE_MAX_AGE_MINUTES = 10
 LOCK_TIMEOUT_MINUTES = 5
-WAIT_FOR_LOCK_TIMEOUT = 60  # maximal 60 Sekunden warten
-WAIT_FOR_LOCK_INTERVAL = 2  # alle 2 Sekunden prüfen
+WAIT_FOR_LOCK_TIMEOUT = 60  # max. 60 Sekunden warten
+WAIT_FOR_LOCK_INTERVAL = 2  # Prüfintervall
 
 
-# === Hilfsfunktionen ===
-def load_cache(url_b64: String):
-    """Lädt den Cache, wenn vorhanden."""
-
-    filename = url_b64 + ".json"
-
-    if not os.path.exists(filename):
-        return None
-    try:
-        with open(filename, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        timestamp = datetime.fromisoformat(data.get("timestamp"))
-        age = datetime.now() - timestamp
-        if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
-            print("LOG: Cache ist gültig.")
-            data["status"] = "cached"
-        else:
-            print(f"LOG: Cache ist {age.total_seconds() / 60:.1f} Minuten alt (veraltet).")
-            data["status"] = "stale"
-        return data
-    except Exception as e:
-        print(f"WARNUNG: Cache konnte nicht geladen werden: {e}")
-        return None
-
-
-def save_cache(url_b64: String, data: dict):
-    """Speichert den Cache mit aktuellem Timestamp."""
-    data["timestamp"] = datetime.now().isoformat()
-    data["status"] = "fresh"
-    cachefile = CACHE_DIR + url_b64 + ".json"
-    try:
-        with open(cachefile, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        print("LOG: Cache aktualisiert.")
-    except Exception as e:
-        print(f"WARNUNG: Cache konnte nicht gespeichert werden: {e}")
-
-
+# === Lock-Handling ===
 def is_scrape_running() -> bool:
-    """Prüft, ob aktuell ein Scrape läuft."""
+    """Prüft, ob ein anderer Scrape läuft."""
     if not os.path.exists(LOCK_FILE):
         return False
     try:
         lock_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(LOCK_FILE))
         if lock_age > timedelta(minutes=LOCK_TIMEOUT_MINUTES):
-            print("WARNUNG: Alte Lockdatei erkannt — entferne sie.")
+            print("WARNUNG: Alte Lockdatei erkannt – entferne sie.")
             os.remove(LOCK_FILE)
             return False
         return True
@@ -86,79 +51,110 @@ def clear_lock():
         print(f"WARNUNG: Lock konnte nicht gelöscht werden: {e}")
 
 
-# === Hauptlogik ===
-def scrape_overview(url_b64: String) -> dict:
-    """Scraped Notes, nutzt Cache und Lock-System."""
-    cached = load_cache(url_b64)
-    # Frischen Cache direkt zurückgeben
-    if cached and cached.get("status") == "cached":
-        return limit_cache(cached, max_patches)
-    # Wenn gerade ein anderer Scrape läuft → warten
-    if is_scrape_running():
-        print("LOG: Ein anderer Scrape läuft — warte auf Freigabe...")
-        waited = 0
-        while is_scrape_running() and waited < WAIT_FOR_LOCK_TIMEOUT:
-            time.sleep(WAIT_FOR_LOCK_INTERVAL)
-            waited += WAIT_FOR_LOCK_INTERVAL
-            print(f"LOG: Warte {waited}s auf Lock-Freigabe...")
-        # Nach Warten: prüfen, ob Cache aktualisiert wurde
-        if is_scrape_running():
-            print("WARNUNG: Lock nach Timeout immer noch aktiv — gebe alten Cache zurück.")
-            if cached:
-                cached["status"] = "waiting"
-                return limit_cache(cached, max_patches)
-            return {"status": "waiting", "threads": []}
-        print("LOG: Lock wurde freigegeben — lade neuen Cache.")
-        new_cache = load_cache()
-        if new_cache:
-            return limit_cache(new_cache, max_patches)
+# === Hauptfunktion ===
+def scrape_notes(url_b64: str) -> dict:
+    """Scraped Patchnotes (content-block text) mit Cache und Lock-System."""
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cachefile = os.path.join(CACHE_DIR, url_b64 + ".json")
+
+    # Cache prüfen
+    if os.path.exists(cachefile):
+        with open(cachefile, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        age = datetime.now() - datetime.fromisoformat(data["timestamp"])
+        if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+            print("LOG: Cache ist aktuell – verwende gespeicherte Daten.")
+            data["status"] = "cached"
+            return data
         else:
-            print("WARNUNG: Kein neuer Cache nach Freigabe — starte Scrape trotzdem.")
-    # Lock setzen, um parallele Scrapes zu verhindern
+            print("LOG: Cache ist veraltet – lade neu.")
+
+    # Wenn gerade ein anderer Scrape läuft, warten
+    waited = 0
+    while is_scrape_running():
+        if waited >= WAIT_FOR_LOCK_TIMEOUT:
+            print("WARNUNG: Timeout beim Warten auf Lock – gebe evtl. alten Cache zurück.")
+            if os.path.exists(cachefile):
+                with open(cachefile, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                data["status"] = "waiting"
+                return data
+            return {"status": "waiting", "sections": {}}
+        print(f"LOG: Warte {waited}s auf Lock-Freigabe...")
+        time.sleep(WAIT_FOR_LOCK_INTERVAL)
+        waited += WAIT_FOR_LOCK_INTERVAL
+
+    # Lock setzen
     set_lock()
-    url = base64.base64decode(url_b64)
+
+    # URL dekodieren
+    url = base64.b64decode(url_b64).decode("utf-8")
+    print(f"LOG: Lade Seite: {url}")
+
+    # Selenium Setup
     service = Service(CHROMEDRIVER)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    results = []
+
     try:
         driver.get(url)
-        print(f"LOG: Navigiert zu: {url}")
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "row.thread"))) # TODO ab hier weiter anpassen
-        print("LOG: Haupt-Container gefunden. Starte Extraktion.")
-        thread_rows = driver.find_elements(By.CLASS_NAME, "row.thread")
-        print(f"LOG: Gefundene Threads: {len(thread_rows)}")
-        for row in thread_rows:
-            try:
-                subject_element = row.find_element(By.CLASS_NAME, "thread-subject")
-                subject_text = subject_element.text.strip()
-                subject_href = subject_element.get_attribute("href")
-                is_pinned = False
-                try:
-                    row.find_element(By.CSS_SELECTOR, "span.thread-flag.thread-flag-label.pinned")
-                    is_pinned = True
-                except Exception:
-                    pass
-                results.append({
-                    "subject": subject_text,
-                    "url": subject_href,
-                    "pinned": is_pinned,
-                })
-            except Exception as e:
-                print(f"WARNUNG: Konnte Zeile nicht parsen: {e}")
-                continue
-        result_data = {"threads": results}
-        save_cache(result_data)
-        result_data["status"] = "fresh"
-        return limit_cache(result_data, max_patches)
+        wait = WebDriverWait(driver, 15)
+        content_div = wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.content-block.text"))
+        )
+        print("LOG: content-block gefunden.")
+
+        html = content_div.get_attribute("outerHTML")
+        text = content_div.text.strip()
+
+        # === HTML analysieren ===
+        soup = BeautifulSoup(html, "html.parser")
+
+        sections = {}
+        current_title = "Intro"
+        sections[current_title] = []
+
+        for element in soup.children:
+            if element.name == "h1":
+                current_title = element.get_text(strip=True)
+                if current_title in sections:
+                    i = 2
+                    base_title = current_title
+                    while f"{base_title} ({i})" in sections:
+                        i += 1
+                    current_title = f"{base_title} ({i})"
+                sections[current_title] = []
+            elif element.name:
+                sections[current_title].append(str(element))
+
+        sections_text = {}
+        for title, contents in sections.items():
+            section_html = "".join(contents)
+            plain = BeautifulSoup(section_html, "html.parser").get_text("\n", strip=True)
+            sections_text[title] = plain
+
+        data = {
+            "status": "fresh",
+            "timestamp": datetime.now().isoformat(),
+            "url": url,
+            "html": html,
+            "text": text,
+            "sections": sections_text,
+        }
+
+        with open(cachefile, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+        print(f"LOG: Cache aktualisiert ({len(sections)} Abschnitte).")
+        return data
+
     except Exception as e:
-        print(f"Ein Fehler beim Scraping ist aufgetreten: {e}")
-        err = {"status": "error", "error": str(e), "threads": []}
-        return err
+        print(f"FEHLER beim Scrapen: {e}")
+        return {"status": "error", "error": str(e)}
+
     finally:
         driver.quit()
         clear_lock()
