@@ -103,7 +103,7 @@ def scrape_notes(url_b64: str) -> dict:
         driver.get(url)
         wait = WebDriverWait(driver, 15)
         content_div = wait.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "div.content-block.text"))
+            EC.presence_of_element_located((By.CLASS_NAME, "content-block.text"))
         )
         print("LOG: content-block gefunden.")
 
