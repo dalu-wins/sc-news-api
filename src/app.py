@@ -34,7 +34,7 @@ def get_scraped_note(url_b64: str):
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": scraped_data["error"]}, 500
 
     return {
-        status: "success",
+        "status": "success",
         "data": {
             "timestamp": scraped_data.get("timestamp"),
             "cacheStatus": scraped_data.get("status"),
