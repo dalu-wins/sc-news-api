@@ -125,9 +125,8 @@ def scrape_notes(url_b64: str) -> dict:
         sections_html = {title: "".join(elements) for title, elements in sections.items()}
 
         data = {
-            "status": "success",
             "timestamp": datetime.now().isoformat(),
-            "cacheStatus": "fresh",
+            "status": "fresh",
             "url": url,
             "notes": sections_html
         }
