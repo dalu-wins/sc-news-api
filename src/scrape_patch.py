@@ -13,17 +13,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# === Konfiguration ===
-CACHE_DIR = "./cache/notes/"
-LOCK_FILE = ".scrape.lock"
-CHROMEDRIVER = "/usr/bin/chromedriver"
-CACHE_MAX_AGE_MINUTES = 10
-LOCK_TIMEOUT_MINUTES = 5
-WAIT_FOR_LOCK_TIMEOUT = 60
-WAIT_FOR_LOCK_INTERVAL = 2
+from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES, WAIT_FOR_LOCK_TIMEOUT, WAIT_FOR_LOCK_INTERVAL, CHROMEDRIVER, PATCH_CACHE_DIR, PATCH_CACHE_MAX_AGE_MINUTES
 
 app = FastAPI(title="Patchnotes API")
-
 
 # === Lock-Handling ===
 def is_scrape_running() -> bool:
