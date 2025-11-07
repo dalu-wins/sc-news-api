@@ -113,6 +113,7 @@ def scrape_notes(url_b64: str) -> dict:
         # === HTML analysieren ===
         soup = BeautifulSoup(html, "html.parser")
 
+        container = soup.find("div", class_="content-block text")
         sections = {}
         current_title = "Intro"
         sections[current_title] = []
