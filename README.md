@@ -20,8 +20,6 @@ For an easy setup, use Docker Compose. By default, the API container exposes por
 ```bash
 # Clone the repository
 git clone https://github.com/dalu-wins/sc-news-api.git
-
-# Go into the project folder
 cd sc-news-api
 
 # Build and start the API container in detached mode
