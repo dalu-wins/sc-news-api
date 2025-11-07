@@ -115,14 +115,14 @@ def scrape_notes(url_b64: str) -> dict:
 
         container = soup.find("div", class_="content-block text")
         sections = {}
-        current_title = "Intro"
-        sections[current_title] = []
+        current_title = None 
 
         print("DEBUG: Starte Section-Parsing...")
 
         for element in container.find_all(recursive=False):  # nur direkte Kinder des Containers
             if element.name == "h1":
                 current_title = element.get_text(strip=True)
+                # Duplikate vermeiden
                 if current_title in sections:
                     i = 2
                     base_title = current_title
@@ -130,8 +130,12 @@ def scrape_notes(url_b64: str) -> dict:
                         i += 1
                     current_title = f"{base_title} ({i})"
                 sections[current_title] = []
-            else:
+                print(f"DEBUG: Neue Section: '{current_title}'")
+            elif element.name and current_title:
                 sections[current_title].append(str(element))
+                print(f"DEBUG: Element zu Section '{current_title}' hinzugefügt, aktuell {len(sections[current_title])} Elemente")
+            else:
+                print(f"DEBUG: Element übersprungen (kein aktueller Section-Title): {element.name}")
                 
         print("\nDEBUG: Fertig mit Section-Parsing.")
         print(f"DEBUG: Gesamtzahl der Sections: {len(sections)}")
@@ -142,8 +146,9 @@ def scrape_notes(url_b64: str) -> dict:
         sections_text = {}
         for title, contents in sections.items():
             section_html = "".join(contents)
-            plain = BeautifulSoup(section_html, "html.parser").get_text("\n", strip=True)
-            sections_text[title] = plain
+            section_soup = BeautifulSoup(section_html, "html.parser")
+            lines = [line for line in section_soup.get_text("\n", strip=True).split("\n") if line.strip()]
+            sections_text[title] = lines
 
         data = {
             "status": "fresh",
