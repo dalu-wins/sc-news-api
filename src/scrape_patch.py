@@ -142,5 +142,5 @@ def scrape_notes(url_b64: str) -> dict:
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": str(e)}
     finally:
         if driver:
-                driver.quit()
-            clear_lock()
+            driver.quit()
+        clear_lock()
