@@ -96,10 +96,12 @@ def parse_patch_entry(entry: dict) -> dict:
     version = get_version(subject)
     build = get_build(subject)
 
+    # provide base64-encoded URL for single thread fetching via API
+    sourceUrl = entry.get("url")
     url_b64 = base64.b64encode(sourceUrl.encode("utf-8")).decode("utf-8")
 
     return {
-        "sourceUrl": entry.get("url"),
+        "sourceUrl": sourceUrl,
         "urlBase64": url_b64,
         "pinned": entry.get("pinned", False),
         "subject": subject,  # keep original subject
