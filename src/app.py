@@ -26,9 +26,9 @@ def get_scraped_overview(max_patches: int = 50):
     }
 
 @app.get("/patch-notes/thread")
-def get_scraped_note(url_b64: str):
+def get_scraped_note(url_base64: str):
 
-    scraped_data = scrape_notes(url_b64=url_b64)
+    scraped_data = scrape_notes(url_b64=url_base64)
 
     if scraped_data.get("error"):
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": scraped_data["error"]}, 500
