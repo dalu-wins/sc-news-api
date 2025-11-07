@@ -26,7 +26,7 @@ def get_scraped_overview(max_patches: int = 50):
     }
 
 @app.get("/patch-notes/thread")
-def get_scraped_note(url_b64: String):
+def get_scraped_note(url_b64: str):
 
     scraped_data = scrape_notes(url_b64=url_b64)
 
