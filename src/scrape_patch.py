@@ -48,15 +48,15 @@ def clear_lock():
 def scrape_notes(url_b64: str) -> dict:
     driver = None
     try:
-        os.makedirs(CACHE_DIR, exist_ok=True)
-        cachefile = os.path.join(CACHE_DIR, url_b64 + ".json")
+        os.makedirs(PATCH_CACHE_DIR, exist_ok=True)
+        cachefile = os.path.join(PATCH_CACHE_DIR, url_b64 + ".json")
 
         # Cache prüfen
         if os.path.exists(cachefile):
             with open(cachefile, "r", encoding="utf-8") as f:
                 data = json.load(f)
             age = datetime.now() - datetime.fromisoformat(data["timestamp"])
-            if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+            if age < timedelta(minutes=PATCH_CACHE_MAX_AGE_MINUTES):
                 data["status"] = "cached"
                 return data
 

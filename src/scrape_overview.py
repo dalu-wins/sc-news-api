@@ -14,14 +14,14 @@ from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES, WAIT_FOR_LOCK_TIMEOUT, WAIT_
 # === Hilfsfunktionen ===
 def load_cache():
     """Lädt den Cache, wenn vorhanden."""
-    if not os.path.exists(CACHE_FILE):
+    if not os.path.exists(OVERVIEW_CACHE_FILE):
         return None
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+        with open(OVERVIEW_CACHE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         timestamp = datetime.fromisoformat(data.get("timestamp"))
         age = datetime.now() - timestamp
-        if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+        if age < timedelta(minutes=OVERVIEW_CACHE_MAX_AGE_MINUTES):
             print("LOG: Cache ist gültig.")
             data["status"] = "cached"
         else:
@@ -38,7 +38,7 @@ def save_cache(data: dict):
     data["timestamp"] = datetime.now().isoformat()
     data["status"] = "fresh"
     try:
-        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        with open(OVERVIEW_CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print("LOG: Cache aktualisiert.")
     except Exception as e:
