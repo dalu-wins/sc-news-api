@@ -119,23 +119,52 @@ def scrape_notes(url_b64: str) -> dict:
 
         print("DEBUG: Starte Section-Parsing...")
 
-        for element in container.find_all(recursive=False):  # nur direkte Kinder des Containers
+        sections = {}
+        current_title = None
+        current_subtitle = None
+
+        for element in container.find_all(recursive=False):
+            # Neue Haupt-Section
             if element.name == "h1":
                 current_title = element.get_text(strip=True)
-                # Duplikate vermeiden
                 if current_title in sections:
                     i = 2
                     base_title = current_title
                     while f"{base_title} ({i})" in sections:
                         i += 1
                     current_title = f"{base_title} ({i})"
-                sections[current_title] = []
-                print(f"DEBUG: Neue Section: '{current_title}'")
-            elif element.name and current_title:
-                sections[current_title].append(str(element))
-                print(f"DEBUG: Element zu Section '{current_title}' hinzugefügt, aktuell {len(sections[current_title])} Elemente")
-            else:
-                print(f"DEBUG: Element übersprungen (kein aktueller Section-Title): {element.name}")
+                sections[current_title] = {}
+                current_subtitle = None
+                print(f"DEBUG: Neue Haupt-Section: {current_title}")
+
+            # Quasi-Sub-Headline: kurzer Text in <div> oder <blockquote>
+            elif element.name in ["div", "blockquote"]:
+                text = element.get_text("\n", strip=True)
+                if current_title and text and len(text) < 50:
+                    current_subtitle = text
+                    sections[current_title][current_subtitle] = []
+                    print(f"DEBUG: Neue Sub-Section: {current_subtitle}")
+                elif current_title and current_subtitle:
+                    sections[current_title][current_subtitle].append(text)
+                elif current_title:
+                    sections[current_title].setdefault("General", []).append(text)
+
+            # Listen
+            elif element.name == "ul" and current_title:
+                items = [li.get_text(strip=True) for li in element.find_all("li")]
+                if current_subtitle:
+                    sections[current_title][current_subtitle].extend(items)
+                else:
+                    sections[current_title].setdefault("General", []).extend(items)
+
+            # Alles andere (Text in Divs)
+            elif current_title:
+                text = element.get_text("\n", strip=True)
+                if current_subtitle:
+                    sections[current_title][current_subtitle].append(text)
+                else:
+                    sections[current_title].setdefault("General", []).append(text)
+
                 
         print("\nDEBUG: Fertig mit Section-Parsing.")
         print(f"DEBUG: Gesamtzahl der Sections: {len(sections)}")
