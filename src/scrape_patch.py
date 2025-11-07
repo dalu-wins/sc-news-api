@@ -119,25 +119,18 @@ def scrape_notes(url_b64: str) -> dict:
 
         print("DEBUG: Starte Section-Parsing...")
 
-        for idx, element in enumerate(soup.children):
-            print(f"\nDEBUG: Element #{idx}: name={element.name} type={type(element)}")
-            
+        for element in container.find_all(recursive=False):  # nur direkte Kinder des Containers
             if element.name == "h1":
                 current_title = element.get_text(strip=True)
-                print(f"DEBUG: Neue Section erkannt: '{current_title}'")
-                
                 if current_title in sections:
                     i = 2
                     base_title = current_title
                     while f"{base_title} ({i})" in sections:
                         i += 1
                     current_title = f"{base_title} ({i})"
-                    print(f"DEBUG: Section-Titel dupliziert, neuer Titel: '{current_title}'")
-                
                 sections[current_title] = []
-            elif element.name:
+            else:
                 sections[current_title].append(str(element))
-                print(f"DEBUG: Element zu Section '{current_title}' hinzugefügt, aktuell {len(sections[current_title])} Elemente")
                 
         print("\nDEBUG: Fertig mit Section-Parsing.")
         print(f"DEBUG: Gesamtzahl der Sections: {len(sections)}")
