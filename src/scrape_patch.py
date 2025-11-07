@@ -54,45 +54,46 @@ def clear_lock():
 
 # === Scraper ===
 def scrape_notes(url_b64: str) -> dict:
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    cachefile = os.path.join(CACHE_DIR, url_b64 + ".json")
-
-    # Cache prüfen
-    if os.path.exists(cachefile):
-        with open(cachefile, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        age = datetime.now() - datetime.fromisoformat(data["timestamp"])
-        if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
-            data["status"] = "cached"
-            return data
-
-    # Warten falls Lock aktiv
-    waited = 0
-    while is_scrape_running():
-        if waited >= WAIT_FOR_LOCK_TIMEOUT:
-            if os.path.exists(cachefile):
-                with open(cachefile, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                data["status"] = "waiting"
-                return data
-            return {"status": "waiting", "sections": {}}
-        time.sleep(WAIT_FOR_LOCK_INTERVAL)
-        waited += WAIT_FOR_LOCK_INTERVAL
-
-    set_lock()
-
-    # URL dekodieren
-    url = base64.b64decode(url_b64).decode("utf-8")
-
-    # Selenium Setup
-    service = Service(CHROMEDRIVER)
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-
+    driver = None
     try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        cachefile = os.path.join(CACHE_DIR, url_b64 + ".json")
+
+        # Cache prüfen
+        if os.path.exists(cachefile):
+            with open(cachefile, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            age = datetime.now() - datetime.fromisoformat(data["timestamp"])
+            if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+                data["status"] = "cached"
+                return data
+
+        # Warten falls Lock aktiv
+        waited = 0
+        while is_scrape_running():
+            if waited >= WAIT_FOR_LOCK_TIMEOUT:
+                if os.path.exists(cachefile):
+                    with open(cachefile, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    data["status"] = "waiting"
+                    return data
+                return {"status": "waiting", "sections": {}}
+            time.sleep(WAIT_FOR_LOCK_INTERVAL)
+            waited += WAIT_FOR_LOCK_INTERVAL
+
+        set_lock()
+
+        # URL dekodieren
+        url = base64.b64decode(url_b64).decode("utf-8")
+
+        # Selenium Setup
+        service = Service(CHROMEDRIVER)
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+
         driver.get(url)
         wait = WebDriverWait(driver, 15)
         content_div = wait.until(
@@ -140,5 +141,6 @@ def scrape_notes(url_b64: str) -> dict:
     except Exception as e:
         return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": str(e)}
     finally:
-        driver.quit()
-        clear_lock()
+        if driver:
+                driver.quit()
+            clear_lock()

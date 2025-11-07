@@ -96,42 +96,44 @@ def limit_cache(data: dict, max_patches: int) -> dict:
 # === Hauptlogik ===
 def scrape_overview(max_patches: int) -> dict:
     """Scraped Threads, nutzt Cache und Lock-System."""
-    cached = load_cache()
-    # Frischen Cache direkt zurückgeben
-    if cached and cached.get("status") == "cached":
-        return limit_cache(cached, max_patches)
-    # Wenn gerade ein anderer Scrape läuft → warten
-    if is_scrape_running():
-        print("LOG: Ein anderer Scrape läuft — warte auf Freigabe...")
-        waited = 0
-        while is_scrape_running() and waited < WAIT_FOR_LOCK_TIMEOUT:
-            time.sleep(WAIT_FOR_LOCK_INTERVAL)
-            waited += WAIT_FOR_LOCK_INTERVAL
-            print(f"LOG: Warte {waited}s auf Lock-Freigabe...")
-        # Nach Warten: prüfen, ob Cache aktualisiert wurde
-        if is_scrape_running():
-            print("WARNUNG: Lock nach Timeout immer noch aktiv — gebe alten Cache zurück.")
-            if cached:
-                cached["status"] = "waiting"
-                return limit_cache(cached, max_patches)
-            return {"status": "waiting", "threads": []}
-        print("LOG: Lock wurde freigegeben — lade neuen Cache.")
-        new_cache = load_cache()
-        if new_cache:
-            return limit_cache(new_cache, max_patches)
-        else:
-            print("WARNUNG: Kein neuer Cache nach Freigabe — starte Scrape trotzdem.")
-    # Lock setzen, um parallele Scrapes zu verhindern
-    set_lock()
-    url = "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048?sort=hot&page=1"
-    service = Service(CHROMEDRIVER)
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    results = []
+    driver = None
     try:
+        cached = load_cache()
+        # Frischen Cache direkt zurückgeben
+        if cached and cached.get("status") == "cached":
+            return limit_cache(cached, max_patches)
+        # Wenn gerade ein anderer Scrape läuft → warten
+        if is_scrape_running():
+            print("LOG: Ein anderer Scrape läuft — warte auf Freigabe...")
+            waited = 0
+            while is_scrape_running() and waited < WAIT_FOR_LOCK_TIMEOUT:
+                time.sleep(WAIT_FOR_LOCK_INTERVAL)
+                waited += WAIT_FOR_LOCK_INTERVAL
+                print(f"LOG: Warte {waited}s auf Lock-Freigabe...")
+            # Nach Warten: prüfen, ob Cache aktualisiert wurde
+            if is_scrape_running():
+                print("WARNUNG: Lock nach Timeout immer noch aktiv — gebe alten Cache zurück.")
+                if cached:
+                    cached["status"] = "waiting"
+                    return limit_cache(cached, max_patches)
+                return {"status": "waiting", "threads": []}
+            print("LOG: Lock wurde freigegeben — lade neuen Cache.")
+            new_cache = load_cache()
+            if new_cache:
+                return limit_cache(new_cache, max_patches)
+            else:
+                print("WARNUNG: Kein neuer Cache nach Freigabe — starte Scrape trotzdem.")
+        # Lock setzen, um parallele Scrapes zu verhindern
+        set_lock()
+        url = "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048?sort=hot&page=1"
+        service = Service(CHROMEDRIVER)
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        results = []
+    
         driver.get(url)
         print(f"LOG: Navigiert zu: {url}")
         wait = WebDriverWait(driver, 10)
@@ -167,6 +169,7 @@ def scrape_overview(max_patches: int) -> dict:
         err = {"status": "error", "error": str(e), "threads": []}
         return err
     finally:
-        driver.quit()
+        if driver:
+            driver.quit()
         clear_lock()
         print("Browser geschlossen, Lock entfernt.")
