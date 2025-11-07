@@ -6,6 +6,7 @@ from subject_parser import parse_patch_entry
 from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES
 
 import base64
+import os
 
 app = FastAPI()
 
