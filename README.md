@@ -1,25 +1,21 @@
 # <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
-Provide information to the [SC-News](https://github.com/dalu-wins/sc-news) app.
-
-## 📝 Variables
-| Variable | Description |
---- | ---
-max_patches | Set the limit of patches that the api will return
+Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu-wins/sc-news) app.
 
 ## 🗄️ Public API
-
-A public API is hosted on my server:
-- [https://sc-news.api.dalu-wins.de/](https://sc-news.api.dalu-wins.de/)
+**Base URL / Subdomain:** [https://sc-news.api.dalu-wins.de/](https://sc-news.api.dalu-wins.de/)
 
 > ⚠️ While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
 
+## 📝 Endpoints & Parameters
+
+| Endpoint | Parameters |
+|----------|------------|
+| `/patch-notes/all` | `max_patches` – optional  |
+| `/patch-notes/thread` | `url_base64` – mandatory |
+
 ## 🛠️ Setup
 
-For an easy setup, use Docker Compose.  
-
-### Steps
-
-By default, the API container exposes port 8000.
+For an easy setup, use Docker Compose. By default, the API container exposes port 8000.
 
 ```bash
 # Clone the repository
