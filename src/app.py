@@ -38,6 +38,6 @@ def get_scraped_note(url_b64: str):
         "data": {
             "timestamp": scraped_data.get("timestamp"),
             "cacheStatus": scraped_data.get("status"),
-            "notes": scraped_data.get("notes", []),
+            "notes": scraped_data.get("sections", []),
         }
     }
