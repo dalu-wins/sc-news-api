@@ -87,6 +87,7 @@ def limit_cache(data: dict, max_patches: int) -> dict:
 # === Hauptlogik ===
 def scrape_overview(max_patches: int) -> dict:
     """Scraped Threads, nutzt Cache und Lock-System."""
+    os.makedirs(os.path.dirname(OVERVIEW_CACHE_FILE), exist_ok=True)
     driver = None
     try:
         cached = load_cache()
