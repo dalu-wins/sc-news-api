@@ -38,7 +38,7 @@ def get_scraped_overview(max_patches: int = 50):
                 latest_per_channel[ch] = patch
 
     for patch in parsed_patches:
-        patch["currently_online"] = (latest_per_channel.get(patch["channel"]) == patch)
+        patch["currentlyOnline"] = (latest_per_channel.get(patch["channel"]) == patch)
 
     return {
         "status": "success",
