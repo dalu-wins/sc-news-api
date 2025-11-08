@@ -8,10 +8,13 @@ Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu
 
 ## 📝 Endpoints & Parameters
 
-| Endpoint | Parameters |
-|----------|------------|
-| `/patch-notes/all` | `max_patches` – optional  |
-| `/patch-notes/thread` | `url_base64` – mandatory |
+| Endpoint | Parameters | Description |
+|----------|------------|-------------|
+| `/patch-notes/all` | `max_patches` – optional  | An overview of all patch notes |
+| `/patch-notes/thread` | `url_base64` – mandatory | Details of a specific patch |
+| `/patch-notes/status` | – | If the scraper is currently idle or active |
+
+> Note: The Base64 encoding of a patch url is included in the result of `/patch-notes/all`
 
 ## 🛠️ Setup
 
