@@ -3,6 +3,7 @@ from scrape_overview import scrape_overview
 from scrape_patch import scrape_notes
 from subject_parser import parse_patch_entry
 from datetime import datetime, timedelta
+from fastapi.middleware.cors import CORSMiddleware
 
 from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES
 
@@ -10,6 +11,15 @@ import base64
 import os
 
 app = FastAPI()
+
+# needed for status on website
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://dalu-wins.de"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/patch-notes/all")
 def get_scraped_overview(max_patches: int = 50):
