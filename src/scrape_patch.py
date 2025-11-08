@@ -13,17 +13,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# === Konfiguration ===
-CACHE_DIR = "./cache/notes/"
-LOCK_FILE = ".scrape.lock"
-CHROMEDRIVER = "/usr/bin/chromedriver"
-CACHE_MAX_AGE_MINUTES = 10
-LOCK_TIMEOUT_MINUTES = 5
-WAIT_FOR_LOCK_TIMEOUT = 60
-WAIT_FOR_LOCK_INTERVAL = 2
+from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES, WAIT_FOR_LOCK_TIMEOUT, WAIT_FOR_LOCK_INTERVAL, CHROMEDRIVER, PATCH_CACHE_DIR, PATCH_CACHE_MAX_AGE_MINUTES
 
 app = FastAPI(title="Patchnotes API")
-
 
 # === Lock-Handling ===
 def is_scrape_running() -> bool:
@@ -56,15 +48,15 @@ def clear_lock():
 def scrape_notes(url_b64: str) -> dict:
     driver = None
     try:
-        os.makedirs(CACHE_DIR, exist_ok=True)
-        cachefile = os.path.join(CACHE_DIR, url_b64 + ".json")
+        os.makedirs(PATCH_CACHE_DIR, exist_ok=True)
+        cachefile = os.path.join(PATCH_CACHE_DIR, url_b64 + ".json")
 
         # Cache prüfen
         if os.path.exists(cachefile):
             with open(cachefile, "r", encoding="utf-8") as f:
                 data = json.load(f)
             age = datetime.now() - datetime.fromisoformat(data["timestamp"])
-            if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+            if age < timedelta(minutes=PATCH_CACHE_MAX_AGE_MINUTES):
                 data["status"] = "cached"
                 return data
 

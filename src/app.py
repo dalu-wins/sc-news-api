@@ -2,8 +2,12 @@ from fastapi import FastAPI
 from scrape_overview import scrape_overview
 from scrape_patch import scrape_notes
 from subject_parser import parse_patch_entry
+from datetime import datetime, timedelta
+
+from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES
 
 import base64
+import os
 
 app = FastAPI()
 
@@ -42,3 +46,22 @@ def get_scraped_note(url_base64: str):
             "notes": scraped_data.get("notes", []),
         }
     }
+
+def is_scrape_running() -> bool:
+    """Checkt, ob die Lockdatei existiert und noch gültig ist."""
+    if not os.path.exists(LOCK_FILE):
+        return False
+    try:
+        lock_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(LOCK_FILE))
+        if lock_age > timedelta(minutes=LOCK_TIMEOUT_MINUTES):
+            # Alte Lockdatei — gilt als abgelaufen
+            return False
+        return True
+    except Exception:
+        return False
+
+@app.get("/patch-notes/status")
+def get_status():
+    if is_scrape_running():
+        return {"status": "active"}
+    return {"status": "idle"}

@@ -9,28 +9,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
-# === Konfiguration ===
-CACHE_FILE = "./cache/spectrum_cache.json"
-LOCK_FILE = ".scrape.lock"
-CHROMEDRIVER = "/usr/bin/chromedriver"
-CACHE_MAX_AGE_MINUTES = 5
-LOCK_TIMEOUT_MINUTES = 5
-WAIT_FOR_LOCK_TIMEOUT = 60  # maximal 60 Sekunden warten
-WAIT_FOR_LOCK_INTERVAL = 2  # alle 2 Sekunden prüfen
-
+from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES, WAIT_FOR_LOCK_TIMEOUT, WAIT_FOR_LOCK_INTERVAL, CHROMEDRIVER, OVERVIEW_CACHE_FILE, OVERVIEW_CACHE_MAX_AGE_MINUTES
 
 # === Hilfsfunktionen ===
 def load_cache():
     """Lädt den Cache, wenn vorhanden."""
-    if not os.path.exists(CACHE_FILE):
+    if not os.path.exists(OVERVIEW_CACHE_FILE):
         return None
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+        with open(OVERVIEW_CACHE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         timestamp = datetime.fromisoformat(data.get("timestamp"))
         age = datetime.now() - timestamp
-        if age < timedelta(minutes=CACHE_MAX_AGE_MINUTES):
+        if age < timedelta(minutes=OVERVIEW_CACHE_MAX_AGE_MINUTES):
             print("LOG: Cache ist gültig.")
             data["status"] = "cached"
         else:
@@ -47,7 +38,7 @@ def save_cache(data: dict):
     data["timestamp"] = datetime.now().isoformat()
     data["status"] = "fresh"
     try:
-        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        with open(OVERVIEW_CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print("LOG: Cache aktualisiert.")
     except Exception as e:
@@ -96,6 +87,7 @@ def limit_cache(data: dict, max_patches: int) -> dict:
 # === Hauptlogik ===
 def scrape_overview(max_patches: int) -> dict:
     """Scraped Threads, nutzt Cache und Lock-System."""
+    os.makedirs(os.path.dirname(OVERVIEW_CACHE_FILE), exist_ok=True)
     driver = None
     try:
         cached = load_cache()
