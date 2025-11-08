@@ -7,16 +7,6 @@ Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu
 
 > Note: While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
 
-## 📝 Endpoints & Parameters
-
-| Endpoint | Parameters | Description |
-|----------|------------|-------------|
-| `/patch-notes/all` | `max_patches` – optional  | An overview of all patch notes |
-| `/patch-notes/thread` | `url_base64` – mandatory | Details of a specific patch |
-| `/patch-notes/status` | – | If the scraper is currently idle or active |
-
-> Note: The Base64 encoding of a patch url is included in the result of `/patch-notes/all`
-
 ## 🛠️ Setup
 
 If you want to host the API yourself, you can use Docker Compose to set it up.
@@ -33,6 +23,17 @@ docker compose up --build -d
 ```
 
 > Note: Android requires HTTPS to access the API.
+
+
+## 📝 Endpoints & Parameters
+
+| Endpoint | Parameters | Description |
+|----------|------------|-------------|
+| `/patch-notes/all` | `max_patches` – optional  | An overview of all patch notes |
+| `/patch-notes/thread` | `url_base64` – mandatory | Details of a specific patch |
+| `/patch-notes/status` | – | If the scraper is currently idle or active |
+
+> Note: The Base64 encoding of a patch url is included in the result of `/patch-notes/all`
 
 ## ℹ️ Notice & Disclaimers
 
