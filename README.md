@@ -5,7 +5,7 @@ Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu
 **Hosted on:** [https://www.dalu-wins.de/](https://www.dalu-wins.de/)<br>
 **Subdomain:** [https://sc-news.api.dalu-wins.de/](https://sc-news.api.dalu-wins.de/)
 
-> ⚠️ While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
+> Note: While the API should handle concurrent access safely, please **avoid unnecessary request spamming** to keep the service stable.
 
 ## 📝 Endpoints & Parameters
 
