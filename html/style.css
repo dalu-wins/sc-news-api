@@ -210,50 +210,47 @@ a:hover {
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
+  body:not(.dark) body {
     background-color: #0d1117;
     color: #c9d1d9;
   }
 
-  .api-card {
+  body:not(.dark) .api-card {
     background-color: #161b22;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }
 
-  body a {
+  body:not(.dark) a {
     color: #58a6ff;
   }
 
-  .notice {
+  body:not(.dark) .notice {
     color: #c0c5ce;             /* Textgrau */
     border-left-color: #2c3e50; /* Akzentlinie */
     background-color: #1a1f28;  /* etwas helleres Dunkel für Hintergrund */
   }
 
-  .api-card .table-wrapper::-webkit-scrollbar-thumb {
+  body:not(.dark) .api-card .table-wrapper::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,0.2);
   }
 
-  .api-card {
+  body:not(.dark) .api-card {
     background-color: #161b22;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }
 
-  api-card h3,
-  .api-card p,
-  .subdomain {
+  body:not(.dark) api-card h3,
+  body:not(.dark) .api-card p,
+  body:not(.dark) .subdomain {
     color: #c9d1d9;
   }
 
-  table th {
+  body:not(.dark) table th {
     background-color: #2c3e50;
   }
 
-  table td {
+  body:not(.dark) table td {
     border-bottom: 1px solid #444c56;
   }
 
-  a {
-    color: #58a6ff;
-  }
 }
