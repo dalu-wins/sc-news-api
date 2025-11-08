@@ -60,7 +60,7 @@ def is_scrape_running() -> bool:
     except Exception:
         return False
 
-@app.get("/status")
+@app.get("/patch-notes/status")
 def get_status():
     if is_scrape_running():
         return {"status": "scraping"}
