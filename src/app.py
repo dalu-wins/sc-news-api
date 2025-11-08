@@ -63,5 +63,5 @@ def is_scrape_running() -> bool:
 @app.get("/patch-notes/status")
 def get_status():
     if is_scrape_running():
-        return {"status": "scraping"}
-    return {"status": "free"}
+        return {"status": "active"}
+    return {"status": "idle"}
