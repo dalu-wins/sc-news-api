@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Overview – dalu-wins.de</title>
+  <link rel="icon" href="https://avatars.githubusercontent.com/u/60736194?v=4&size=512">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Controls -->
+  <div class="top-controls">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">🌙</button>
+  </div>
+
+  <header>
+    <h1>API Overview</h1>
+    <p>Overview of all APIs hosted on dalu-wins.de</p>
+  </header>
+
+  <main>
+    <section class="api-section">
+
+      <!-- SC-News-API -->
+      <div class="api-card">
+        <!-- GitHub icon button -->
+        <a class="github-btn" href="https://github.com/dalu-wins/sc-news-api" target="_blank" title="GitHub Repository">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577
+                     0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.744.083-.729.083-.729
+                     1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.76-1.605-2.665-.3-5.467-1.334-5.467-5.931
+                     0-1.31.465-2.381 1.235-3.221-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23a11.5 11.5 0 0 1 3-.405c1.02.005 2.045.138 3 .405
+                     2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.911 1.23 3.221
+                     0 4.609-2.807 5.625-5.48 5.921.42.36.81 1.096.81 2.21 0 1.595-.015 2.875-.015 3.26 0 .315.21.694.825.576
+                     C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </a>
+
+        <h3>Star Citizen News API</h3>
+        <p class="subdomain">Subdomain: <strong>sc-news.api.dalu-wins.de</strong></p>
+        <div class="table-wrapper"> 
+          <table>
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Parameters</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://sc-news.api.dalu-wins.de/patch-notes/all" target="_blank">/patch-notes/all</a></td>
+                <td>
+                  <ul>
+                    <li><code>max_patches</code> – optional</li>
+                  </ul>
+                </td>
+                <td>Returns a list of recent patch note threads (uses cache for performance).</td>
+              </tr>
+
+              <tr>
+                <td><a href="https://sc-news.api.dalu-wins.de/patch-notes/thread" target="_blank">/patch-notes/thread</a></td>
+                <td>
+                  <ul>
+                    <li><code>url_base64</code> – mandatory</li>
+                  </ul>
+                </td>
+                <td>Fetches and parses the patch notes for a given Spectrum thread.</td>
+              </tr>
+
+              <tr>
+                <td><a href="https://sc-news.api.dalu-wins.de/patch-notes/status" target="_blank">/patch-notes/status</a></td>
+                <td>–</td>
+                <td>Shows whether the scraper is currently active or idle.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="notice">
+          <p>This is an unofficial Star Citizen fan project.</p>
+          <p>Star Citizen®, Roberts Space Industries® and Cloud Imperium® are registered trademarks of Cloud Imperium Rights LLC.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 dalu-wins.de</p>
+  </footer>
+
+  <script src="theme.js"></script>
+
+</body>
+</html>
