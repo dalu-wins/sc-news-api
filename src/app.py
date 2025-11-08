@@ -15,7 +15,7 @@ app = FastAPI()
 # needed for status on website
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://dalu-wins.de"],
+    allow_origins=["https://www.dalu-wins.de"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
