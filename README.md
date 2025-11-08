@@ -19,7 +19,9 @@ Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu
 
 ## 🛠️ Setup
 
-For an easy setup, use Docker Compose. By default, the API container exposes port 8000.
+If you want to host the API yourself, you can use Docker Compose to set it up.
+
+Edit the `docker-compose.yml` to your needs. By default, the API container runs on port 8000.
 
 ```bash
 # Clone the repository
