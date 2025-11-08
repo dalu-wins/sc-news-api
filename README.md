@@ -1,4 +1,4 @@
-# <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/app_icon.svg" alt="App Icon" height="32"> Star Citizen News API
+# Star Citizen News API
 Retrieves the latest Star Citizen news for the [SC-News](https://github.com/dalu-wins/sc-news) app.
 
 ## 🗄️ Public API
@@ -32,12 +32,6 @@ docker compose up --build -d
 
 > Note: Android requires HTTPS to access the API.
 
-## ✍ Documentation
-
-Learn more about this project:
-- [Project Board](https://github.com/users/dalu-wins/projects/3/views/1)
-- [SC News App](https://github.com/dalu-wins/sc-news)
-
 ## ℹ️ Notice & Disclaimers
 
 This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of
@@ -49,4 +43,5 @@ Imperium Rights LLC
 
 <p align="center">
   <img src="https://github.com/dalu-wins/sc-news/blob/main/assets/MadeByTheCommunity_White.png" alt="Made By The Community Banner" height="200">
+  <img height="200" src="https://github.com/dalu-wins/sc-news/blob/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp">
 </p>
