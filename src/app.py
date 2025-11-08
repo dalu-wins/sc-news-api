@@ -30,6 +30,16 @@ def get_scraped_overview(max_patches: int = 50):
 
     parsed_patches = [parse_patch_entry(t) for t in scraped_data.get("threads", [])]
 
+    latest_per_channel = {}
+    for patch in parsed_patches:
+        if patch["pinned"]:
+            ch = patch["channel"]
+            if ch not in latest_per_channel:
+                latest_per_channel[ch] = patch
+
+    for patch in parsed_patches:
+        patch["currently_online"] = (latest_per_channel.get(patch["channel"]) == patch)
+
     return {
         "status": "success",
         "data": {
