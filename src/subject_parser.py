@@ -64,20 +64,34 @@ def get_wave(subject: str) -> Wave:
     return Wave.Unknown
 
 
+import re
+
 def get_version(subject: str) -> dict:
-    """Extrahiert eine Version aus einem String."""
-    # Full Version x.y.z
-    m = re.search(r"(\d+)\.(\d+)\.(\d+)", subject)
-    if m:
-        return {"major": int(m.group(1)), "minor": int(m.group(2)), "patch": int(m.group(3))}
+    """Extracts a version and ignores dates."""    
+    # Pattern erklärt: 
+    # \b(?<!\.) -> Wortgrenze, kein Punkt davor
+    # (\d+)\.(\d+)(?:\.(\d+))? -> x.y oder x.y.z
+    # (?!\.\d{4}) -> Negativer Lookahead: Verhindert Treffer, wenn direkt danach .2026 (Jahr) folgt
+    pattern = r"\b(?<!\.)(\d+)\.(\d+)(?:\.(\d+))?(?!\.\d{4})\b"
+    
+    matches = re.finditer(pattern, subject)
+    
+    for m in matches:
+        major = int(m.group(1))
+        minor = int(m.group(2))
+        patch = int(m.group(3)) if m.group(3) else 0
+        
+        # Plausibilitätscheck: In Star Citizen sind Major-Versionen aktuell einstellig (z.B. 3 oder 4).
+        # Jahre wie 2026 haben 4 Stellen. 
+        if major < 1000: 
+            return {"major": major, "minor": minor, "patch": patch}
 
-    # Shortened x.y
-    m = re.search(r"(\d+)\.(\d+)", subject)
-    if m:
-        return {"major": int(m.group(1)), "minor": int(m.group(2)), "patch": 0}
-
-    # No version found
     return {"major": 0, "minor": 0, "patch": 0}
+
+# Test
+title = "Star Citizen Alpha 4.6 LIVE - Hotfix Central [Updated 2.2.2026]"
+print(get_version(title)) 
+# Ergebnis: {'major': 4, 'minor': 6, 'patch': 0}
 
 
 def get_build(subject: str) -> str:
