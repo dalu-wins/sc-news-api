@@ -88,11 +88,6 @@ def get_version(subject: str) -> dict:
 
     return {"major": 0, "minor": 0, "patch": 0}
 
-# Test
-title = "Star Citizen Alpha 4.6 LIVE - Hotfix Central [Updated 2.2.2026]"
-print(get_version(title)) 
-# Ergebnis: {'major': 4, 'minor': 6, 'patch': 0}
-
 
 def get_build(subject: str) -> str:
     """Extract buildnumber (min len 7)."""
