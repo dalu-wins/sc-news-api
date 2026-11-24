@@ -5,11 +5,53 @@ from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-from config import LOCK_FILE, LOCK_TIMEOUT_MINUTES, WAIT_FOR_LOCK_TIMEOUT, WAIT_FOR_LOCK_INTERVAL, CHROMEDRIVER, OVERVIEW_CACHE_FILE, OVERVIEW_CACHE_MAX_AGE_MINUTES
+from config import (
+    LOCK_FILE,
+    LOCK_TIMEOUT_MINUTES,
+    WAIT_FOR_LOCK_TIMEOUT,
+    WAIT_FOR_LOCK_INTERVAL,
+    CHROMEDRIVER,
+    OVERVIEW_CACHE_FILE,
+    OVERVIEW_CACHE_MAX_AGE_MINUTES,
+)
+
+FORUM_ID = "190048"
+OVERVIEW_URL = f"https://robertsspaceindustries.com/spectrum/community/SC/forum/{FORUM_ID}?sort=hot&page=1"
+THREAD_LINK_SELECTOR = f'a[href*="/forum/{FORUM_ID}/thread/"]'
+DEBUG_HTML_FILE = "./cache/debug_overview.html"
+
+EXTRACT_JS = """
+const linkSel = arguments[0];
+const seen = new Set();
+const out = [];
+
+const add = (a, pinned) => {
+    const href = a.href;
+    const text = (a.textContent || "").trim();
+    if (!href || !text || seen.has(href)) return;
+    seen.add(href);
+    out.push({subject: text, url: href, pinned: pinned});
+};
+
+document.querySelectorAll('li[class*="ThreadListItem"]').forEach(li => {
+    const a = li.querySelector('a.title__link') || li.querySelector(linkSel);
+    if (!a) return;
+    const pinned = li.classList.contains('-isPinned') || !!li.querySelector('.title__pin-icon');
+    add(a, pinned);
+});
+
+if (out.length === 0) {
+    document.querySelectorAll(linkSel).forEach(a => {
+        const li = a.closest('li');
+        const pinned = !!(li && (li.classList.contains('-isPinned') || li.querySelector('.title__pin-icon')));
+        add(a, pinned);
+    });
+}
+return out;
+"""
+
 
 # === Hilfsfunktionen ===
 def load_cache():
@@ -80,8 +122,18 @@ def limit_cache(data: dict, max_patches: int) -> dict:
     return {
         "timestamp": data.get("timestamp"),
         "status": data.get("status"),
-        "threads": limited
+        "threads": limited,
     }
+
+
+def dump_debug_html(driver):
+    """Speichert das gerenderte HTML zum Debuggen."""
+    try:
+        with open(DEBUG_HTML_FILE, "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        print(f"LOG: Debug-HTML gespeichert unter {DEBUG_HTML_FILE}")
+    except Exception as e:
+        print(f"WARNUNG: Debug-HTML konnte nicht gespeichert werden: {e}")
 
 
 # === Hauptlogik ===
@@ -115,51 +167,42 @@ def scrape_overview(max_patches: int) -> dict:
                 return limit_cache(new_cache, max_patches)
             else:
                 print("WARNUNG: Kein neuer Cache nach Freigabe — starte Scrape trotzdem.")
+
         # Lock setzen, um parallele Scrapes zu verhindern
         set_lock()
-        url = "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048?sort=hot&page=1"
         service = Service(CHROMEDRIVER)
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        results = []
-    
-        driver.get(url)
-        print(f"LOG: Navigiert zu: {url}")
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "row.thread")))
-        print("LOG: Haupt-Container gefunden. Starte Extraktion.")
-        thread_rows = driver.find_elements(By.CLASS_NAME, "row.thread")
-        print(f"LOG: Gefundene Threads: {len(thread_rows)}")
-        for row in thread_rows:
-            try:
-                subject_element = row.find_element(By.CLASS_NAME, "thread-subject")
-                subject_text = subject_element.text.strip()
-                subject_href = subject_element.get_attribute("href")
-                is_pinned = False
-                try:
-                    row.find_element(By.CSS_SELECTOR, "span.thread-flag.thread-flag-label.pinned")
-                    is_pinned = True
-                except Exception:
-                    pass
-                results.append({
-                    "subject": subject_text,
-                    "url": subject_href,
-                    "pinned": is_pinned,
-                })
-            except Exception as e:
-                print(f"WARNUNG: Konnte Zeile nicht parsen: {e}")
-                continue
+
+        driver.get(OVERVIEW_URL)
+        print(f"LOG: Navigiert zu: {OVERVIEW_URL}")
+
+        try:
+            WebDriverWait(driver, 15).until(
+                lambda d: len(d.find_elements("css selector", THREAD_LINK_SELECTOR)) > 0
+            )
+        except Exception:
+            print("WARNUNG: Keine Thread-Links gefunden (Timeout).")
+            dump_debug_html(driver)
+            raise
+
+        results = driver.execute_script(EXTRACT_JS, THREAD_LINK_SELECTOR)
+        print(f"LOG: Gefundene Threads: {len(results)}")
+
+        if not results:
+            dump_debug_html(driver)
+            raise RuntimeError("Keine Threads extrahiert")
+
         result_data = {"threads": results}
         save_cache(result_data)
         result_data["status"] = "fresh"
         return limit_cache(result_data, max_patches)
     except Exception as e:
         print(f"Ein Fehler beim Scraping ist aufgetreten: {e}")
-        err = {"status": "error", "error": str(e)}
-        return err
+        return {"status": "error", "error": str(e)}
     finally:
         if driver:
             driver.quit()
