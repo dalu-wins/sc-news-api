@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from scrape_overview import scrape_overview
-from scrape_patch import scrape_notes
 from subject_parser import parse_patch_entry
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,24 +46,6 @@ def get_scraped_overview(max_patches: int = 50):
             "cacheStatus": scraped_data.get("status"),
             "patches": parsed_patches,
         },
-    }
-
-@app.get("/patch-notes/thread")
-def get_scraped_note(url_base64: str):
-
-    scraped_data = scrape_notes(url_b64=url_base64)
-
-    if scraped_data.get("error"):
-        return {"status": "failure", "message": "Scraping fehlgeschlagen", "details": scraped_data["error"]}, 500
-
-    return {
-        "status": "success",
-        "data": {
-            "timestamp": scraped_data.get("timestamp"),
-            "cacheStatus": scraped_data.get("status"),
-            "url": scraped_data.get("url"),
-            "notes": scraped_data.get("notes", []),
-        }
     }
 
 def is_scrape_running() -> bool:

@@ -9,9 +9,3 @@ CHROMEDRIVER = "/usr/bin/chromedriver"
 # === SCRAPE_OVERVIEW ===
 OVERVIEW_CACHE_FILE = "./cache/spectrum_cache.json"
 OVERVIEW_CACHE_MAX_AGE_MINUTES = 5
-
-
-
-# === SCRAPE_PATCH ===
-PATCH_CACHE_DIR = "./cache/notes/"
-PATCH_CACHE_MAX_AGE_MINUTES = 10
